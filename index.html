@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111B2C">
+<title>Sequenza Esatta · Gioca</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#111B2C;
+  --panel:#1B2A41;
+  --board:#E6ECF5;
+  --muted:#B7C5D9;
+  --violet:#7B5CFF;
+  --teal:#17D9C6;
+  --ink:#1B2A41;
+  --bad:#E5383B
+}
+*{
+  box-sizing:border-box
+}
+body{
+  margin:0;
+  background:var(--bg);
+  color:#fff;
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+  line-height:1.45
+}
+button,input{
+  font:inherit
+}
+button{
+  cursor:pointer;
+  border:1px solid #50617b;
+  border-radius:12px;
+  background:#283c57;
+  color:#fff;
+  padding:11px 14px;
+  font-weight:750;
+  touch-action:manipulation
+}
+button:disabled{
+  cursor:default;
+  opacity:.42
+}
+button:focus-visible,input:focus-visible,summary:focus-visible{
+  outline:3px solid var(--teal);
+  outline-offset:3px
+}
+button.primary{
+  background:var(--violet);
+  border-color:#b5a4ff
+}
+button.danger{
+  background:#792b3d
+}
+button.small{
+  padding:7px 10px;
+  font-size:.86rem
+}
+button.ghost{
+  background:transparent
+}
+input{
+  min-width:0;
+  width:100%;
+  border:1px solid #71839b;
+  border-radius:12px;
+  background:#fff;
+  color:var(--ink);
+  padding:13px;
+  font-size:1.05rem
+}
+input[type=checkbox]{
+  width:20px;
+  height:20px;
+  accent-color:var(--teal)
+}
+label{
+  display:grid;
+  gap:6px;
+  font-weight:650
+}
+h1,h2,h3,p{
+  margin:0
+}
+h1{
+  font-size:clamp(1.8rem,6vw,2.6rem);
+  line-height:1.1
+}
+h2{
+  font-size:1.12rem
+}
+h3{
+  font-size:1rem
+}
+small,.muted{
+  color:var(--muted);
+  font-size:.87rem
+}
+.stack{
+  display:grid;
+  gap:14px
+}
+.row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap
+}
+.spread{
+  justify-content:space-between
+}
+.panel{
+  min-width:0;
+  background:var(--panel);
+  border:1px solid #34465f;
+  border-radius:18px;
+  padding:16px
+}
+.page{
+  max-width:1120px;
+  margin:auto;
+  padding:20px max(12px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))
+}
+.entry{
+  max-width:440px;
+  margin:7vh auto
+}
+.entry header{
+  display:grid;
+  gap:12px;
+  margin-bottom:25px
+}
+.brand{
+  color:#b9a7ff;
+  font-size:.8rem;
+  font-weight:800;
+  letter-spacing:.14em;
+  text-transform:uppercase
+}
+.dots{
+  display:flex;
+  gap:9px;
+  margin-bottom:10px
+}
+.dots i{
+  display:block;
+  width:18px;
+  height:18px;
+  border-radius:50%
+}
+.wide{
+  width:100%
+}
+.status{
+  background:#263d53;
+  border:1px solid #547390;
+  border-radius:12px;
+  padding:11px 14px;
+  margin-bottom:12px
+}
+.status.error{
+  background:#552337;
+  border-color:#d9677c
+}
+.status:empty{
+  display:none
+}
+.connection{
+  margin-bottom:12px;
+  color:#ffdb84
+}
+.connection:empty{
+  display:none
+}
+.topbar{
+  display:grid;
+  gap:10px;
+  margin-bottom:14px
+}
+.turn.mine{
+  color:var(--teal);
+  font-weight:800
+}
+.turn{
+  font-weight:700
+}
+.toggle{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  font-size:.85rem
+}
+.layout{
+  display:grid;
+  gap:14px
+}
+.play-column{
+  min-width:0;
+  display:grid;
+  gap:14px;
+  align-content:start
+}
+.players{
+  list-style:none;
+  padding:0;
+  margin:0;
+  display:grid;
+  gap:9px
+}
+.player{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px;
+  border-radius:12px;
+  background:#243852
+}
+.player.me{
+  outline:2px solid var(--teal)
+}
+.avatar{
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  display:inline-grid;
+  place-items:center;
+  font-weight:850;
+  flex-shrink:0
+}
+.player-name{
+  overflow-wrap:anywhere;
+  flex:1
+}
+.chip{
+  font-size:.76rem;
+  padding:3px 7px;
+  border-radius:7px;
+  background:#334a68
+}
+.tile{
+  display:inline-grid;
+  place-items:center;
+  position:relative;
+  width:54px;
+  height:54px;
+  border-radius:50%;
+  background:var(--tile);
+  color:var(--ink);
+  flex-shrink:0;
+  vertical-align:middle;
+  border:2px solid #ffffff70;
+  padding:0
+}
+.tile svg{
+  width:94%;
+  height:94%;
+  display:block;
+  overflow:visible
+}
+.tile svg text{
+  font-family:system-ui,sans-serif;
+  font-weight:850;
+  fill:var(--ink);
+  font-size:27px;
+  text-anchor:middle;
+  dominant-baseline:central
+}
+.tile.hidden{
+  font-size:24px;
+  font-weight:850
+}
+.tile.crossed{
+  opacity:.38
+}
+.tile.crossed:after{
+  content:"";
+  position:absolute;
+  left:7%;
+  right:7%;
+  height:3px;
+  transform:rotate(-40deg);
+  background:#111b2c;
+  box-shadow:0 0 0 1px #ffffff90
+}
+.tile.selected{
+  outline:3px solid var(--teal);
+  outline-offset:2px
+}
+.tile.mini{
+  width:33px;
+  height:33px
+}
+.tile.mini svg text{
+  font-size:25px
+}
+.tiles{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center
+}
+.piles{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap
+}
+.pile{
+  min-width:49px;
+  border-color:var(--tile);
+  border-top:6px solid var(--tile);
+  padding:8px 12px;
+  background:#22354e
+}
+.pile strong{
+  display:block;
+  font-size:1.1rem
+}
+.rack{
+  display:flex;
+  align-items:flex-start;
+  gap:5px;
+  overflow-x:auto;
+  padding:8px 3px 12px;
+  scrollbar-width:thin
+}
+.rack-slot{
+  display:grid;
+  gap:7px;
+  justify-items:center;
+  min-width:68px;
+  max-width:90px
+}
+.gap{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  align-items:center;
+  min-width:15px;
+  border-top:2px dashed #63758e;
+  padding-top:7px;
+  margin-top:21px;
+  min-height:22px
+}
+.badges{
+  display:flex;
+  gap:4px;
+  flex-wrap:wrap;
+  justify-content:center
+}
+.badge{
+  font-size:.72rem;
+  padding:2px 5px;
+  background:#344965;
+  border-radius:6px;
+  white-space:nowrap
+}
+.badge.no{
+  text-decoration:line-through;
+  text-decoration-thickness:1px
+}
+.symbols{
+  display:flex;
+  gap:3px;
+  flex-wrap:wrap;
+  justify-content:center
+}
+.symbol-toggle{
+  padding:3px;
+  width:28px;
+  height:28px;
+  border-radius:6px;
+  background:#344965
+}
+.symbol-toggle svg{
+  width:100%;
+  height:100%
+}
+.symbol-toggle.excluded{
+  opacity:.3;
+  background:#161f2c;
+  text-decoration:line-through
+}
+.board-scroll{
+  overflow:auto;
+  max-width:100%;
+  padding:4px 0
+}
+.board-row{
+  display:flex;
+  gap:5px;
+  margin:7px 0;
+  min-width:max-content
+}
+.board-row .tile{
+  width:39px;
+  height:39px
+}
+.board-panel{
+  min-width:0
+}
+.board-panel .muted{
+  font-size:.8rem
+}
+.opponent{
+  padding:12px 0;
+  border-bottom:1px solid #3a4b62
+}
+.opponent:last-child{
+  border:0
+}
+.opponent .rack-slot{
+  min-width:56px
+}
+.opponent .tile:not(.mini){
+  width:46px;
+  height:46px
+}
+.history{
+  padding-left:20px;
+  color:#c8d4e5;
+  font-size:.86rem;
+  max-height:250px;
+  overflow:auto
+}
+.history li{
+  margin:7px 0
+}
+.notice{
+  padding:10px;
+  border-radius:10px;
+  background:#493c29;
+  color:#ffe2a9;
+  font-size:.87rem
+}
+.ranking{
+  display:grid;
+  gap:8px
+}
+.ranking-row{
+  display:grid;
+  grid-template-columns:30px 1fr auto;
+  gap:10px;
+  align-items:center;
+  padding:11px;
+  border-radius:12px;
+  background:#293d57
+}
+.rank{
+  font-size:1.35rem;
+  font-weight:850;
+  color:#d9cfff
+}
+.points{
+  font-weight:850;
+  text-align:right
+}
+.results{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  margin:18px 0
+}
+.result{
+  display:grid;
+  justify-items:center;
+  gap:8px;
+  animation:reveal .35s both;
+  animation-delay:var(--delay)
+}
+.result.ok{
+  color:#5be8a0
+}
+.result.wrong{
+  color:#ff8d9d
+}
+.result .tile{
+  outline:3px solid currentColor
+}
+.picker{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(55px,1fr));
+  gap:10px;
+  margin:14px 0
+}
+.picker .tile{
+  justify-self:center
+}
+dialog{
+  color:#fff;
+  background:var(--panel);
+  border:1px solid #647695;
+  border-radius:20px;
+  width:min(94vw,560px);
+  max-height:88dvh;
+  padding:20px;
+  overflow:auto
+}
+dialog::backdrop{
+  background:#050a14c9;
+  backdrop-filter:blur(3px)
+}
+.dialog-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:start;
+  gap:12px;
+  margin-bottom:15px
+}
+.dialog-head button{
+  padding:5px 10px
+}
+.dialog-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:16px
+}
+.compare-targets{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:12px
+}
+.empty{
+  padding:10px 0;
+  color:var(--muted)
+}
+@keyframes reveal{
+  from{
+    opacity:0;
+    transform:translateY(10px) scale(.8)
+  }
+  to{
+    opacity:1;
+    transform:none
+  }
+}
+@media(min-width:850px){
+  .layout{
+    grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)
+  }
+  .board-panel{
+    align-self:start;
+    position:sticky;
+    top:14px
+  }
+}
+@media(max-width:380px){
+  .panel{
+    padding:12px
+  }
+  .page{
+    padding-left:9px;
+    padding-right:9px
+  }
+  .tile{
+    width:49px;
+    height:49px
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  *{
+    animation:none!important;
+    scroll-behavior:auto!important
+  }
+}
+</style>
+</head>
+<body>
+<main class="page">
+  <div id="message" class="status" role="alert"></div>
+  <div id="connection" class="connection" role="status" aria-live="polite"></div>
+  <div id="app"></div>
+</main>
+<dialog id="modal" aria-labelledby="modal-title"></dialog>
+<noscript>Attiva JavaScript per partecipare a Sequenza Esatta.</noscript>
+<script>
+"use strict";
+const RELAY_WS_URL = "wss://sequenzaesatta-relay.onrender.com/relay";
+const params = new URLSearchParams(location.search);
+const relayUrl = params.get("relay") || RELAY_WS_URL;
+const TILE_COLORS = ["#FF3EA5", "#F2E04A", "#FF8C69", "#17D9C6", "#7B5CFF", "#3FA9FF", "#6CCB4A"];
+const PLAYER_COLORS = ["#1F6FD6", "#D9480F", "#1E8E3E", "#C2255C", "#6741D9", "#0C8599", "#9C6B00", "#5C677D"];
+const SYMBOL_NAMES = ["triangolo", "quadrato", "cerchio", "esagono", "stella"];
+const STATUS_NAMES = ["Sequenza esatta", "In gara", "Ha rinunciato", "Sequenza errata", "Escluso"];
+const SHAPES = [
+  '<path d="M50 8 94 88H6Z"/>',
+  '<rect x="12" y="12" width="76" height="76" rx="12"/>',
+  '<circle cx="50" cy="50" r="42"/>',
+  '<path d="M28 9H72L96 50 72 91H28L4 50Z"/>',
+  '<path d="M50 3 63 33 97 36 71 58 79 92 50 74 21 92 29 58 3 36 37 33Z"/>'
+];
+const app = document.getElementById("app");
+const modal = document.getElementById("modal");
+let roomCode = (params.get("room") || "").toUpperCase().slice(0, 5);
+let playerName = "", token = "", currentGameId = "", sequence = 0, pending = null;
+let socket = null, reconnectTimer = null, handshakeTimer = null, retryDelay = 1000;
+let active = false, ready = false, synchronized = false, lastHostReply = 0;
+let view = null, lobby = null, screen = "entry", autoCross = true, opponentsOpen = false;
+let notes = [], crossedByHand = new Set(), excludedSymbols = [];
+let dialogState = null, declarationQueue = [], seenDeclarations = new Set(), finalShown = false;
+let history = [], historyKeys = new Set();
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, character => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[character]);
+}
+function message(text = "", error = false) {
+  const element = document.getElementById("message");
+  element.textContent = text;
+  element.className = "status" + (error ? " error" : "");
+}
+function connection(text = "") { document.getElementById("connection").textContent = text; }
+function storageSet(key, value) {
+  if (value === null) localStorage.removeItem(key);
+  else localStorage.setItem(key, String(value));
+}
+function parseSaved(key, fallback) {
+  const text = localStorage.getItem(key);
+  if (!text) return fallback;
+  try { return JSON.parse(text); } catch { return fallback; }
+}
+function persistSession() {
+  // Write pending first: after a reload its sequence also recovers a partial storage write.
+  storageSet("pending_" + roomCode, pending ? JSON.stringify(pending) : null);
+  storageSet("sequence_" + roomCode, sequence);
+  storageSet("game_" + roomCode, currentGameId);
+}
+function saveNotes() {
+  try {
+    storageSet("notes_" + roomCode + "_" + currentGameId, JSON.stringify({
+      notes, crossedByHand: [...crossedByHand], excludedSymbols: excludedSymbols.map(set => [...set])
+    }));
+  } catch { message("Impossibile salvare gli appunti. Verifica lo spazio disponibile nel browser.", true); }
+}
+function restoreNotes(reset) {
+  const saved = reset ? {} : parseSaved("notes_" + roomCode + "_" + currentGameId, {}) || {};
+  const total = view.colors * view.symbols * view.cycles;
+  notes = Array.from({ length: view.length }, (_, position) => {
+    const number = saved.notes?.[position];
+    return Number.isInteger(number) && number > 0 && number <= total && colorOf(number) === me().handColors[position] ? number : null;
+  });
+  crossedByHand = new Set((Array.isArray(saved.crossedByHand) ? saved.crossedByHand : []).filter(n => Number.isInteger(n) && n > 0 && n <= total));
+  excludedSymbols = Array.from({ length: view.length }, (_, position) => new Set(
+    (Array.isArray(saved.excludedSymbols?.[position]) ? saved.excludedSymbols[position] : []).filter(n => Number.isInteger(n) && n >= 0 && n < view.symbols)
+  ));
+  if (reset) saveNotes();
+}
+
+function integer(text) {
+  if (!/^-?\d+$/.test(String(text))) throw new Error("Intero Wire non valido");
+  const value = Number(text);
+  if (!Number.isSafeInteger(value)) throw new Error("Intero Wire fuori limite");
+  return value;
+}
+function integers(text, separator = ",") { return text === "" ? [] : text.split(separator).map(integer); }
+function decodeClue(text) {
+  const fields = text.split(":");
+  const type = fields[0];
+  if (type === "S" && fields.length === 3) return { type, tile: integer(fields[1]), slot: integer(fields[2]) };
+  if (type === "C" && fields.length === 4) return { type, tile: integer(fields[1]), position: integer(fields[2]), same: fields[3] === "1" };
+  if (type === "R" && fields.length === 2) return { type, tile: integer(fields[1]) };
+  if (type === "G" && fields.length === 4) return { type, position: integer(fields[1]), number: integer(fields[2]), correct: fields[3] === "1" };
+  throw new Error("Indizio Wire non valido");
+}
+function decodeEvent(text) {
+  if (text === "-") return null;
+  const fields = text.split(","), type = fields[0], player = integer(fields[1]);
+  switch (type) {
+    case "R": return { type, player, tile: integer(fields[2]) };
+    case "Q": return { type, player, clue: decodeClue(fields[2]) };
+    case "D": return { type, player, results: (fields[2] || "").split("").map(n => n === "1"), numbers: integers(fields[3] || "", ".") };
+    case "U": case "K": return { type, player };
+    case "N": return { type, player, connected: fields[2] === "1" };
+    default: return null;
+  }
+}
+function decodeHostMessage(wire) {
+  if (typeof wire !== "string") throw new Error("Messaggio Wire assente");
+  const lines = wire.split("\n");
+  if (lines[0] === "X") return { type: "rejected", reason: lines[1] || "Ingresso rifiutato." };
+  if (lines[0] === "L") return { type: "lobby", seat: integer(lines[1]), names: lines[2].split("\t").filter(Boolean) };
+  if (lines[0] !== "U") throw new Error("Messaggio Wire sconosciuto");
+  const head = integers(lines[2]);
+  if (head.length !== 12) throw new Error("Intestazione Wire non valida");
+  const [viewer, colors, symbols, cycles, length, currentPlayer, phase, winner, turn, round, turnPosition, activePlayers] = head;
+  const players = lines.slice(5).filter(Boolean).map(line => {
+    const fields = line.split("\t");
+    if (fields.length !== 14) throw new Error("Giocatore Wire non valido");
+    return {
+      name: fields[0], handColors: integers(fields[1]), hand: fields[2] === "-" ? null : integers(fields[2]),
+      clues: fields[3] ? fields[3].split(",").map(decodeClue) : [], eliminated: fields[4] === "1",
+      knownCount: integer(fields[5]), connected: fields[6] === "1", kickable: fields[7] === "1",
+      kickVotes: integer(fields[8]), kickVotesNeeded: integer(fields[9]), status: integer(fields[10]),
+      turnsUsed: integer(fields[11]), rank: integer(fields[12]), points: integer(fields[13])
+    };
+  });
+  if (colors < 2 || colors > 7 || symbols < 1 || symbols > 5 || cycles < 1 || cycles > 20 || length < 1 || length > 7 || phase < 0 || phase > 4 || !players[viewer]) throw new Error("Configurazione Wire non valida");
+  const pool = integers(lines[3]), supplyCounts = integers(lines[4]);
+  if (supplyCounts.length !== colors || players.some(player => player.handColors.length !== length)) throw new Error("Tabellone Wire incompleto");
+  return { type: "update", event: decodeEvent(lines[1]), view: { viewer, colors, symbols, cycles, length, currentPlayer, phase, winner, turn, round, turnPosition, activePlayers, players, pool, supplyCounts } };
+}
+
+function send(envelope) {
+  if (socket?.readyState !== WebSocket.OPEN) return false;
+  socket.send(JSON.stringify(envelope));
+  return true;
+}
+function guestSend(payload) { return send({ type: "send", payload }); }
+function detachSocket() {
+  clearTimeout(handshakeTimer);
+  if (socket) {
+    const old = socket;
+    socket = null;
+    old.close(1000, "Leaving");
+  }
+  ready = false;
+  synchronized = false;
+}
+function leave(error = "", forget = false) {
+  active = false;
+  clearTimeout(reconnectTimer);
+  reconnectTimer = null;
+  detachSocket();
+  if (forget) {
+    try { storageSet("token_" + roomCode, null); storageSet("pending_" + roomCode, null); }
+    catch { message("Impossibile aggiornare la sessione salvata.", true); }
+  }
+  view = null; lobby = null; dialogState = null; declarationQueue = [];
+  screen = "entry";
+  connection();
+  message(error, Boolean(error));
+  render();
+}
+function scheduleReconnect() {
+  if (!active || reconnectTimer) return;
+  ready = false; synchronized = false;
+  connection("Collegamento interrotto. Riconnessione in corso…");
+  render();
+  reconnectTimer = setTimeout(() => {
+    reconnectTimer = null;
+    connect();
+  }, retryDelay);
+  retryDelay = Math.min(retryDelay * 2, 10000);
+}
+function connect() {
+  if (!active) return;
+  detachSocket();
+  let current;
+  try { current = new WebSocket(relayUrl); } catch { leave("Indirizzo del relay non valido."); return; }
+  socket = current;
+  handshakeTimer = setTimeout(() => {
+    if (socket !== current || ready) return;
+    detachSocket();
+    scheduleReconnect();
+  }, 15000);
+  current.onopen = () => {
+    if (socket !== current) return;
+    send({ type: "join", room: roomCode, token: token || "", name: playerName });
+  };
+  current.onmessage = event => {
+    if (socket !== current || !active) return;
+    try { receive(JSON.parse(event.data)); }
+    catch (error) { leave("Impossibile leggere o salvare la sessione. " + error.message); }
+  };
+  current.onclose = event => {
+    if (socket !== current || !active) return;
+    socket = null;
+    clearTimeout(handshakeTimer);
+    if (event.code === 4001) leave("La sessione è stata aperta in un’altra scheda. Continua da quella scheda.");
+    else scheduleReconnect();
+  };
+  current.onerror = () => {
+    if (socket !== current || !active) return;
+    detachSocket();
+    scheduleReconnect();
+  };
+}
+function joinRoom(name, code) {
+  const normalized = code.trim().toUpperCase();
+  if (!/^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{5}$/.test(normalized)) {
+    message("Inserisci il codice stanza di 5 caratteri mostrato dall’host.", true); return;
+  }
+  let endpoint;
+  try { endpoint = new URL(relayUrl); } catch { message("Indirizzo del relay non valido.", true); return; }
+  const local = ["localhost", "127.0.0.1", "[::1]"].includes(endpoint.hostname);
+  if (relayUrl.includes("YOUR-RELAY-HOST") || (endpoint.protocol !== "wss:" && !(endpoint.protocol === "ws:" && local && location.protocol === "http:"))) {
+    message("Il relay deve essere configurato con un indirizzo wss://. Per le prove locali usa ?relay=ws://localhost:8080/relay da una pagina HTTP locale.", true); return;
+  }
+  roomCode = normalized;
+  playerName = name.replace(/[\t\r\n|]/g, " ").trim().slice(0, 16) || "Giocatore";
+  try {
+    storageSet("playerName", playerName);
+    token = localStorage.getItem("token_" + roomCode) || "";
+    currentGameId = localStorage.getItem("game_" + roomCode) || "";
+    sequence = Number(localStorage.getItem("sequence_" + roomCode) || 0);
+    pending = parseSaved("pending_" + roomCode, null);
+    if (!Number.isSafeInteger(sequence) || sequence < 0) sequence = 0;
+    if (pending && (pending.type !== "move" || pending.gameId !== currentGameId || !Number.isSafeInteger(pending.moveSeq) || pending.moveSeq < 1 || typeof pending.wire !== "string")) pending = null;
+    if (pending) sequence = Math.max(sequence, pending.moveSeq);
+    if (!token) { sequence = 0; pending = null; currentGameId = ""; }
+  } catch { message("Consenti il salvataggio locale nel browser per poter entrare e recuperare la partita.", true); return; }
+  message();
+  connection("Collegamento alla stanza in corso…");
+  view = null; lobby = null; history = []; historyKeys.clear(); seenDeclarations.clear();
+  declarationQueue = []; finalShown = false; dialogState = null;
+  active = true; screen = "connecting"; retryDelay = 1000;
+  render();
+  connect();
+}
+function receive(envelope) {
+  switch (envelope.type) {
+    case "ready":
+      if (envelope.role !== "guest" || envelope.room !== roomCode || typeof envelope.token !== "string") throw new Error("Handshake non valido");
+      token = envelope.token;
+      storageSet("token_" + roomCode, token);
+      ready = true; retryDelay = 1000; lastHostReply = Date.now();
+      clearTimeout(handshakeTimer);
+      send({ type: "attached" });
+      connection(envelope.hostOnline ? "Sincronizzazione con l’host…" : "In attesa dell’host…");
+      break;
+    case "hostOnline": guestSend({ type: "join" }); break;
+    case "hostOffline":
+      synchronized = false; connection("In attesa dell’host…"); render(); break;
+    case "closed": case "error": leave(envelope.message || "Stanza non disponibile.", true); break;
+    case "host": receiveHost(envelope.payload); break;
+  }
+}
+function receiveHost(payload) {
+  lastHostReply = Date.now();
+  if (payload.type === "pong") {
+    if (!synchronized) guestSend({ type: "join" });
+    return;
+  }
+  if (payload.type !== "state") return;
+  const decoded = decodeHostMessage(payload.wire);
+  if (decoded.type === "rejected") { leave(decoded.reason, true); return; }
+  if (typeof payload.gameId !== "string" || !Number.isSafeInteger(payload.ack) || payload.ack < 0) throw new Error("Conferma mossa non valida");
+  const changed = currentGameId !== payload.gameId;
+  const firstView = !view;
+  if (changed) {
+    currentGameId = payload.gameId; sequence = payload.ack; pending = null;
+    notes = []; crossedByHand.clear(); excludedSymbols = [];
+    history = []; historyKeys.clear(); seenDeclarations.clear();
+    declarationQueue = []; finalShown = false; dialogState = null;
+  } else {
+    if (pending && payload.ack >= pending.moveSeq) pending = null;
+    sequence = Math.max(sequence, payload.ack);
+  }
+  persistSession();
+  synchronized = true;
+  connection();
+  if (decoded.type === "lobby") {
+    lobby = decoded; screen = "lobby";
+  } else {
+    view = decoded.view; screen = "game";
+    if (changed || firstView) restoreNotes(changed);
+    if (dialogState?.type === "clue" && (!isMyTurn() || view.phase !== 1 || !view.pool.includes(dialogState.tile))) dialogState = null;
+    if (me().eliminated && ["picker", "confirm", "giveup"].includes(dialogState?.type)) dialogState = null;
+    recordHistory(decoded.event);
+    if (decoded.event?.type === "D") {
+      const key = JSON.stringify(decoded.event);
+      if (!seenDeclarations.has(key)) {
+        seenDeclarations.add(key);
+        declarationQueue.push(decoded.event);
+        if (dialogState?.type !== "declaration") dialogState = null;
+      }
+    }
+    nextOverlay();
+  }
+  render();
+  if (pending) guestSend(pending);
+}
+function sendMove(wireString) {
+  if (!active || !ready || !synchronized || pending || !view || !currentGameId || view.phase === 4 || me().eliminated) return false;
+  if (sequence >= Number.MAX_SAFE_INTEGER) { message("Limite mosse raggiunto.", true); return false; }
+  const previous = sequence;
+  sequence++;
+  pending = { type: "move", gameId: currentGameId, moveSeq: sequence, wire: wireString };
+  try { persistSession(); }
+  catch {
+    sequence = previous; pending = null;
+    message("Mossa non inviata. Impossibile salvarla nel browser.", true); return false;
+  }
+  dialogState = null;
+  message();
+  guestSend(pending);
+  render();
+  return true;
+}
+setInterval(() => {
+  if (!active || !ready || socket?.readyState !== WebSocket.OPEN) return;
+  guestSend({ type: "ping" });
+  if (synchronized && pending) guestSend(pending);
+  if (Date.now() - lastHostReply > 25000 && synchronized) {
+    synchronized = false; connection("In attesa dell’host…"); render();
+  }
+}, 5000);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible" || !active) return;
+  if (socket?.readyState === WebSocket.OPEN && ready) {
+    synchronized = false; connection("Sincronizzazione con l’host…");
+    guestSend({ type: "join" }); render();
+  } else {
+    clearTimeout(reconnectTimer); reconnectTimer = null; connect();
+  }
+});
+window.addEventListener("online", () => {
+  if (active && socket?.readyState !== WebSocket.OPEN) {
+    clearTimeout(reconnectTimer); reconnectTimer = null; connect();
+  }
+});
+
+function me() { return view.players[view.viewer]; }
+function colorOf(number) { return (number - 1) % view.colors; }
+function symbolOf(number) { return Math.floor((number - 1) / view.colors) % view.symbols; }
+function isMyTurn() { return view && view.currentPlayer === view.viewer && !me().eliminated; }
+function canAct() { return active && ready && synchronized && !pending && view && view.phase !== 4 && !me().eliminated; }
+function canDeclare() {
+  return canAct() && notes.length === view.length && notes.every((number, index) => Number.isInteger(number) && number > 0 && colorOf(number) === me().handColors[index] && (index === 0 || number > notes[index - 1]));
+}
+function symbolSvg(symbol, number = "") {
+  return `<svg viewBox="0 0 100 100" aria-hidden="true"><g fill="white">${SHAPES[symbol]}</g>${number !== "" ? `<text x="50" y="${symbol === 0 ? 60 : 51}">${number}</text>` : ""}</svg>`;
+}
+function tile(number, options = {}) {
+  const color = number ? colorOf(number) : options.color;
+  const label = options.label || (number ? `Numero ${number}, ${SYMBOL_NAMES[symbolOf(number)]}` : "Numero nascosto");
+  const content = number ? symbolSvg(symbolOf(number), number) : "?";
+  const classes = `tile${number ? "" : " hidden"}${options.mini ? " mini" : ""}${options.crossed ? " crossed" : ""}`;
+  const attrs = `class="${classes}" style="--tile:${TILE_COLORS[color]}" aria-label="${escapeHtml(label)}"`;
+  if (options.action) return `<button ${attrs} data-act="${options.action}" data-value="${options.value ?? number}" ${options.disabled ? "disabled" : ""} ${options.pressed !== undefined ? `aria-pressed="${options.pressed}"` : ""}>${content}</button>`;
+  return `<span ${attrs} role="img">${content}</span>`;
+}
+function visibleNumbers() {
+  const visible = new Set(view.pool);
+  for (const [index, player] of view.players.entries()) {
+    if (index !== view.viewer && player.hand) player.hand.forEach(number => visible.add(number));
+    for (const clue of player.clues) if (["S", "C", "R"].includes(clue.type)) visible.add(clue.tile);
+  }
+  return visible;
+}
+function isCrossed(number, visible = visibleNumbers()) { return crossedByHand.has(number) || (autoCross && visible.has(number)); }
+function clueText(clue) {
+  if (clue.type === "S") return `${clue.tile} nello spazio ${clue.slot} della sequenza`;
+  if (clue.type === "C") return `${clue.tile} ${clue.same ? "ha lo stesso simbolo della" : "ha un simbolo diverso dalla"} casella ${clue.position + 1}`;
+  if (clue.type === "G") return `Casella ${clue.position + 1}, numero ${clue.number}: ${clue.correct ? "corretto" : "errato"}`;
+  return `Tessera ${clue.tile} scoperta`;
+}
+function recordHistory(event) {
+  const append = (key, text) => {
+    if (historyKeys.has(key)) return;
+    historyKeys.add(key); history.push(text);
+    if (history.length > 200) history.shift();
+  };
+  view.players.forEach((player, seat) => player.clues.forEach((clue, index) => append(`clue:${seat}:${index}`, `${player.name} · ${clueText(clue)}`)));
+  if (!event) return;
+  const name = view.players[event.player]?.name || "Giocatore";
+  if (event.type === "R") append(`reveal:${event.tile}`, `${name} ha scoperto ${event.tile}`);
+  if (event.type === "D") append(`declare:${event.player}`, `${name} ha dichiarato ${event.numbers.join(", ")} · ${event.results.every(Boolean) ? "sequenza esatta" : "sequenza errata"}`);
+  if (event.type === "U") append(`retired:${event.player}`, `${name} ha rinunciato`);
+  if (event.type === "K") append(`kicked:${event.player}`, `${name} è stato escluso`);
+}
+function rack(player, own = false) {
+  let html = `<div class="rack" data-scroll="rack-${view.players.indexOf(player)}">`;
+  for (let position = 0; position <= view.length; position++) {
+    const sorted = player.clues.filter(clue => clue.type === "S" && clue.slot === position);
+    html += `<div class="gap" aria-label="Spazio ${position}">${sorted.map(clue => tile(clue.tile, { mini: true })).join("")}</div>`;
+    if (position === view.length) break;
+    const number = own && !player.hand ? notes[position] : player.hand?.[position];
+    html += `<div class="rack-slot"><small>${position + 1}</small>${tile(number, { color: player.handColors[position], action: own && !player.eliminated ? "pick" : null, value: position, label: `Casella ${position + 1}${number ? `, numero ${number}` : ", scegli un numero"}` })}`;
+    html += `<div class="badges">${player.clues.filter(clue => clue.type === "C" && clue.position === position).map(clue => `<span class="badge ${clue.same ? "" : "no"}" title="${escapeHtml(clueText(clue))}">${clue.tile}${clue.same ? "=" : "≠"}</span>`).join("")}</div>`;
+    if (own && !player.eliminated) html += `<div class="symbols">${Array.from({ length: view.symbols }, (_, symbol) => `<button class="symbol-toggle ${excludedSymbols[position].has(symbol) ? "excluded" : ""}" data-act="symbol" data-pos="${position}" data-value="${symbol}" aria-label="Escludi ${SYMBOL_NAMES[symbol]} dalla casella ${position + 1}" aria-pressed="${excludedSymbols[position].has(symbol)}">${symbolSvg(symbol)}</button>`).join("")}</div>`;
+    html += "</div>";
+  }
+  return html + "</div>";
+}
+function ranking() {
+  return `<div class="ranking">${view.players.map((player, seat) => ({ player, seat })).sort((a, b) => a.player.rank - b.player.rank || a.seat - b.seat).map(({ player, seat }) => `<div class="ranking-row"><span class="rank">${player.rank}°</span><div><strong>${escapeHtml(player.name)}${seat === view.viewer ? " · tu" : ""}</strong><div class="muted">${STATUS_NAMES[player.status]} · ${player.turnsUsed ? `T${player.turnsUsed}` : "—"}</div></div><span class="points">${player.points}<br><small>punti</small></span></div>`).join("")}</div>`;
+}
+function renderEntry() {
+  return `<section class="entry"><header><div class="dots" aria-hidden="true">${TILE_COLORS.slice(0, 5).map(color => `<i style="background:${color}"></i>`).join("")}</div><p class="brand">Sequenza Esatta</p><h1>Trova la tua<br>sequenza.</h1><p class="muted">Inserisci il codice mostrato dall’host per giocare.</p></header><form id="join-form" class="panel stack"><label>Il tuo nome<input name="name" maxlength="16" autocomplete="nickname" value="${escapeHtml(playerName)}" placeholder="Giocatore"></label><label>Codice stanza<input name="room" maxlength="5" autocapitalize="characters" autocomplete="off" spellcheck="false" value="${escapeHtml(roomCode)}" placeholder="K7M9P" required></label><button class="primary wide" type="submit">ENTRA</button></form></section>`;
+}
+function renderLobby() {
+  return `<section class="entry stack"><p class="brand">Sequenza Esatta</p><div class="row spread"><h1>Stanza ${escapeHtml(roomCode)}</h1><button class="small ghost" data-act="leave">Esci</button></div><div class="panel stack"><h2>Giocatori collegati</h2><ul class="players">${lobby.names.map((name, index) => `<li class="player ${index === lobby.seat ? "me" : ""}"><span class="avatar" style="background:${PLAYER_COLORS[index % PLAYER_COLORS.length]}">${escapeHtml(name.slice(0, 1).toUpperCase())}</span><span class="player-name">${escapeHtml(name)}</span>${index === lobby.seat ? '<span class="chip">Tu</span>' : ""}${index === 0 ? '<span class="chip">Host</span>' : ""}</li>`).join("")}</ul><p class="muted">In attesa che l’host avvii la partita…</p></div></section>`;
+}
+function renderGame() {
+  const ownTurn = isMyTurn(), usable = canAct(), visible = visibleNumbers();
+  const disconnected = view.players.map((player, seat) => ({ player, seat })).filter(({ player, seat }) => seat !== view.viewer && !player.connected && !player.eliminated);
+  const phaseMessage = ["Scegli una pila da cui scoprire una tessera.", "Scegli una tessera scoperta per chiedere un indizio.", "Le tessere sono esaurite. Dichiara la sequenza oppure rinuncia.", "Hai l’ultima dichiarazione. Puoi dichiarare oppure rinunciare.", "Partita conclusa."][view.phase];
+  let board = "";
+  for (let color = 0; color < view.colors; color++) {
+    board += '<div class="board-row">';
+    for (let number = color + 1; number <= view.colors * view.symbols * view.cycles; number += view.colors) {
+      board += tile(number, { action: "cross", crossed: isCrossed(number, visible), pressed: isCrossed(number, visible), disabled: me().eliminated || (autoCross && visible.has(number)) });
+    }
+    board += "</div>";
+  }
+  return `<header class="topbar"><div class="row spread"><span class="brand">Stanza ${escapeHtml(roomCode)}</span><div class="row"><span class="chip">T${view.round} - G${view.turnPosition}/${view.activePlayers}</span><button class="small ghost" data-act="leave">Esci</button></div></div><div class="row spread"><span class="turn ${ownTurn ? "mine" : ""}">${view.phase === 4 ? "Partita conclusa" : ownTurn ? "▶ Il tuo turno" : `Turno di ${escapeHtml(view.players[view.currentPlayer]?.name || "—")}`}</span><div class="row"><label class="toggle"><input id="auto-cross" type="checkbox" ${autoCross ? "checked" : ""}>Auto-barra</label><button class="small" data-act="opponents" aria-expanded="${opponentsOpen}">Avversari / Storico</button></div></div></header>
+  ${pending ? '<p class="status" role="status">Conferma della mossa in attesa…</p>' : ""}
+  ${disconnected.map(({ player, seat }) => `<div class="notice row spread"><span>${escapeHtml(player.name)} è scollegato.</span>${player.kickable ? `<button class="small danger" data-act="kick" data-value="${seat}" ${usable ? "" : "disabled"}>Elimina ${escapeHtml(player.name)} (${player.kickVotes}/${player.kickVotesNeeded})</button>` : '<span>Attendo il rientro…</span>'}</div>`).join("")}
+  <div class="layout"><div class="play-column"><section class="panel stack"><h2>${me().eliminated ? STATUS_NAMES[me().status] : "Il tavolo"}</h2><p class="muted">${phaseMessage}</p>${view.phase === 0 ? `<div class="piles">${view.supplyCounts.map((count, color) => `<button class="pile" style="--tile:${TILE_COLORS[color]}" data-act="reveal" data-value="${color}" aria-label="Pesca dalla pila ${color + 1}, ${count} tessere" ${usable && ownTurn && count > 0 ? "" : "disabled"}><strong>${count}</strong><small>Pila ${color + 1}</small></button>`).join("")}</div>` : ""}<div class="tiles">${view.pool.map(number => tile(number, { action: "clue", disabled: !(usable && ownTurn && view.phase === 1) })).join("") || '<p class="empty">Nessuna tessera scoperta.</p>'}</div>${[2, 3].includes(view.phase) && ownTurn ? `<button data-act="giveup" class="danger" ${usable ? "" : "disabled"}>RINUNCIA</button>` : ""}</section>
+  <section class="panel stack"><h2>La mia sequenza</h2>${rack(me(), true)}${!me().eliminated ? `<p class="muted">Tocca una casella per annotare un numero. Tocca un simbolo per escluderlo.</p><button class="primary wide" data-act="declare" ${canDeclare() ? "" : "disabled"}>DICHIARA COMBINAZIONE</button>` : '<p class="muted">Puoi seguire la partita e la classifica.</p>'}</section>
+  ${opponentsOpen ? `<section class="panel stack"><h2>Avversari</h2>${view.players.map((player, seat) => seat === view.viewer ? "" : `<article class="opponent"><div class="row"><span class="avatar" style="background:${PLAYER_COLORS[seat % PLAYER_COLORS.length]}">${escapeHtml(player.name.slice(0, 1).toUpperCase())}</span><strong>${escapeHtml(player.name)}</strong><small>${STATUS_NAMES[player.status]}</small></div>${rack(player)}</article>`).join("")}<h2>Storico e indizi</h2><ol class="history" data-scroll="history">${history.slice().reverse().map(text => `<li>${escapeHtml(text)}</li>`).join("") || "<li>Nessun indizio ricevuto.</li>"}</ol></section>` : ""}
+  ${view.phase === 4 || view.players.some(player => player.eliminated) ? `<section class="panel stack"><h2>${view.phase === 4 ? "Classifica finale" : "Classifica provvisoria"}</h2>${ranking()}${view.phase === 4 ? '<button data-act="final">Apri classifica finale</button>' : ""}</section>` : ""}</div>
+  <section class="panel board-panel stack"><div class="row spread"><h2>Tabellone</h2><span class="muted">${view.colors * view.symbols * view.cycles} numeri</span></div><p class="muted">Tocca per barrare o ripristinare un numero. Scorri le righe per vedere tutte le tessere.</p><div class="board-scroll" data-scroll="board">${board}</div></section></div>`;
+}
+function render() {
+  const scrollPositions = new Map([...app.querySelectorAll("[data-scroll]")].map(element => [element.dataset.scroll, { left: element.scrollLeft, top: element.scrollTop }]));
+  const focused = document.activeElement;
+  const action = focused?.dataset?.act, value = focused?.dataset?.value, position = focused?.dataset?.pos;
+  if (screen === "entry") app.innerHTML = renderEntry();
+  else if (screen === "connecting") app.innerHTML = '<section class="entry panel stack"><h1>Collegamento…</h1><p class="muted">Attendo la stanza e i giocatori.</p><button data-act="leave">ANNULLA</button></section>';
+  else if (screen === "lobby") app.innerHTML = renderLobby();
+  else app.innerHTML = renderGame();
+  for (const element of app.querySelectorAll("[data-scroll]")) {
+    const previous = scrollPositions.get(element.dataset.scroll);
+    if (previous) { element.scrollLeft = previous.left; element.scrollTop = previous.top; }
+  }
+  renderDialog();
+  if (action && !modal.open) {
+    [...app.querySelectorAll("[data-act]")].find(element => element.dataset.act === action && element.dataset.value === value && element.dataset.pos === position)?.focus({ preventScroll: true });
+  }
+}
+function nextOverlay() {
+  if (dialogState) return;
+  if (declarationQueue.length) dialogState = { type: "declaration", event: declarationQueue.shift() };
+  else if (view?.phase === 4 && !finalShown) { finalShown = true; dialogState = { type: "final" }; }
+}
+function closeDialog() { dialogState = null; nextOverlay(); renderDialog(); }
+function renderDialog() {
+  if (!dialogState) { if (modal.open) modal.close(); return; }
+  let title = "", body = "";
+  const usable = canAct();
+  switch (dialogState.type) {
+    case "picker": {
+      const position = dialogState.position, visible = visibleNumbers();
+      const candidates = [];
+      for (let number = me().handColors[position] + 1; number <= view.colors * view.symbols * view.cycles; number += view.colors) {
+        if (!isCrossed(number, visible) && !excludedSymbols[position].has(symbolOf(number))) candidates.push(number);
+      }
+      title = `Casella ${position + 1}`;
+      body = `<p class="muted">Annota il numero che hai dedotto.</p><div class="picker">${candidates.map(number => tile(number, { action: "note" })).join("") || '<p class="empty">Nessun candidato. Controlla le barrature e i simboli esclusi.</p>'}</div><button data-act="clear-note">Cancella appunto</button>`;
+      break;
+    }
+    case "clue":
+      title = `Tessera ${dialogState.tile}`;
+      body = `<div class="tiles">${tile(dialogState.tile)}</div><div class="dialog-actions"><button class="primary" data-act="sort" ${usable ? "" : "disabled"}>Inserisci nella sequenza</button><button data-act="compare-mode" ${usable ? "" : "disabled"}>Confronta simbolo</button></div>${dialogState.compare ? `<p class="muted">Scegli la casella da confrontare.</p><div class="compare-targets">${me().handColors.map((color, index) => `<button data-act="compare" data-value="${index}" style="border-color:${TILE_COLORS[color]}" ${usable ? "" : "disabled"}>Casella ${index + 1}</button>`).join("")}</div>` : ""}`;
+      break;
+    case "confirm":
+      title = "Dichiara combinazione";
+      body = `<div class="tiles">${notes.map(number => tile(number)).join("")}</div><p class="muted">Hai un solo tentativo. Con un errore esci dalla gara.</p><div class="dialog-actions"><button class="primary" data-act="confirm-declare" ${canDeclare() ? "" : "disabled"}>CONFERMA DICHIARAZIONE</button></div>`;
+      break;
+    case "giveup":
+      title = "Rinunciare alla dichiarazione?";
+      body = `<p>La tua partita terminerà con lo stato “Ha rinunciato”.</p><div class="dialog-actions"><button class="danger" data-act="confirm-giveup" ${usable ? "" : "disabled"}>RINUNCIA</button></div>`;
+      break;
+    case "declaration": {
+      const event = dialogState.event;
+      title = `${view.players[event.player]?.name || "Giocatore"} dichiara`;
+      body = `<div class="results">${event.numbers.map((number, index) => `<div class="result ${event.results[index] ? "ok" : "wrong"}" style="--delay:${index * 100}ms">${tile(number)}<strong>${event.results[index] ? "✓ Corretta" : "✕ Errata"}</strong></div>`).join("")}</div><h3>${view.phase === 4 ? "Classifica finale" : "Classifica provvisoria"}</h3>${ranking()}<div class="dialog-actions"><button class="primary" data-act="close-dialog">CONTINUA</button></div>`;
+      break;
+    }
+    case "final":
+      title = "Classifica finale";
+      body = `${ranking()}<div class="dialog-actions"><button class="primary" data-act="close-dialog">TORNA AL TAVOLO</button></div>`;
+      break;
+  }
+  modal.innerHTML = `<div class="dialog-head"><h2 id="modal-title">${escapeHtml(title)}</h2><button class="ghost" data-act="close-dialog" aria-label="Chiudi">×</button></div>${body}`;
+  if (!modal.open) modal.showModal();
+}
+function handleAction(event) {
+  const button = event.target.closest("button[data-act]");
+  if (!button || button.disabled) return;
+  const value = Number(button.dataset.value);
+  switch (button.dataset.act) {
+    case "leave": leave(); return;
+    case "close-dialog": closeDialog(); return;
+    case "opponents": opponentsOpen = !opponentsOpen; break;
+    case "reveal": if (canAct() && isMyTurn() && view.phase === 0 && view.supplyCounts[value] > 0) sendMove("R," + value); return;
+    case "clue": if (canAct() && isMyTurn() && view.phase === 1 && view.pool.includes(value)) dialogState = { type: "clue", tile: value }; break;
+    case "sort": if (dialogState?.type === "clue" && isMyTurn() && view.phase === 1) sendMove("S," + dialogState.tile); return;
+    case "compare-mode": dialogState.compare = true; break;
+    case "compare": if (dialogState?.type === "clue" && isMyTurn() && view.phase === 1) sendMove(`C,${dialogState.tile},${value}`); return;
+    case "pick": if (!me().eliminated) dialogState = { type: "picker", position: value }; break;
+    case "note": if (dialogState?.type === "picker") { notes[dialogState.position] = value; saveNotes(); dialogState = null; } break;
+    case "clear-note": if (dialogState?.type === "picker") { notes[dialogState.position] = null; saveNotes(); dialogState = null; } break;
+    case "symbol": {
+      const set = excludedSymbols[Number(button.dataset.pos)];
+      if (set.has(value)) set.delete(value); else set.add(value);
+      saveNotes(); break;
+    }
+    case "cross":
+      if (autoCross && visibleNumbers().has(value)) return;
+      if (crossedByHand.has(value)) crossedByHand.delete(value); else crossedByHand.add(value);
+      saveNotes(); break;
+    case "declare": if (canDeclare()) dialogState = { type: "confirm" }; break;
+    case "confirm-declare": if (canDeclare()) sendMove("D," + notes.join(",")); return;
+    case "giveup": if (canAct() && isMyTurn() && [2, 3].includes(view.phase)) dialogState = { type: "giveup" }; break;
+    case "confirm-giveup": if (isMyTurn() && [2, 3].includes(view.phase)) sendMove("G"); return;
+    case "kick": if (canAct() && view.players[value]?.kickable && value !== view.viewer) sendMove("K," + value); return;
+    case "final": dialogState = { type: "final" }; break;
+  }
+  render();
+}
+app.addEventListener("click", handleAction);
+modal.addEventListener("click", handleAction);
+modal.addEventListener("cancel", event => { event.preventDefault(); closeDialog(); });
+app.addEventListener("submit", event => {
+  if (event.target.id !== "join-form") return;
+  event.preventDefault();
+  const data = new FormData(event.target);
+  joinRoom(String(data.get("name") || ""), String(data.get("room") || ""));
+});
+app.addEventListener("input", event => {
+  if (event.target.name === "room") event.target.value = event.target.value.toUpperCase().slice(0, 5);
+});
+app.addEventListener("change", event => {
+  if (event.target.id !== "auto-cross") return;
+  autoCross = event.target.checked;
+  try { storageSet("autoCross", autoCross); } catch { message("Preferenza valida per questa sessione."); }
+  render();
+});
+try {
+  playerName = (localStorage.getItem("playerName") || "").slice(0, 16);
+  autoCross = localStorage.getItem("autoCross") !== "false";
+} catch { message("Il salvataggio locale è disabilitato. Abilitalo per poter recuperare la partita.", true); }
+render();
+</script>
+</body>
+</html>
