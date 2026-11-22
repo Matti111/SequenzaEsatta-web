@@ -567,9 +567,36 @@ dialog::backdrop{
     scroll-behavior:auto!important
   }
 }
+
+.orientation-notice{display:none}
+@media (orientation:portrait) and (max-width:900px) and (any-pointer:coarse){
+  .orientation-notice{
+    display:flex;align-items:center;gap:14px;
+    margin:12px max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left));
+    padding:16px;border:2px solid var(--violet);border-radius:18px;
+    background:linear-gradient(135deg,#34235c,var(--panel));
+    box-shadow:0 5px 0 #0a1120;
+  }
+  .orientation-notice svg{width:48px;height:48px;flex-shrink:0;color:var(--teal)}
+  .orientation-notice strong{display:block;font-size:1.1rem}
+  .orientation-notice p{margin:5px 0 0;color:var(--muted);font-size:1rem}
+  .orientation-notice button{margin-top:10px}
+}
 </style>
 </head>
 <body>
+<aside class="orientation-notice" aria-label="Orientamento del telefono">
+  <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+    <rect x="11" y="15" width="30" height="20" rx="4"/>
+    <path d="M35 23v4M8 25A16 16 0 0 1 25 8M19 3l6 5-6 5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <div><strong>Ruota il telefono in orizzontale</strong>
+    <p>Vedrai meglio il tabellone e le tue tessere, come nell’app.</p>
+    <p id="orientation-help">Se lo schermo non ruota, disattiva il blocco rotazione del telefono.</p>
+    <button id="landscape-button" class="primary" type="button" hidden>Attiva schermo intero e orizzontale</button>
+  </div>
+</aside>
+
 <main class="page">
   <div id="message" class="status" role="alert"></div>
   <div id="connection" class="connection" role="status" aria-live="polite"></div>
@@ -579,6 +606,26 @@ dialog::backdrop{
 <noscript>Attiva JavaScript per partecipare a Sequenza Esatta.</noscript>
 <script>
 "use strict";
+
+// Orientation is an enhancement. Rejections must never interrupt the game.
+const landscapeButton = document.getElementById("landscape-button");
+if (typeof screen.orientation?.lock === "function" &&
+    typeof document.documentElement.requestFullscreen === "function" && document.fullscreenEnabled) {
+  landscapeButton.hidden = false;
+  landscapeButton.addEventListener("click", async () => {
+    landscapeButton.disabled = true;
+    try {
+      if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
+      await screen.orientation.lock("landscape");
+    } catch {
+      document.getElementById("orientation-help").textContent =
+        "Il browser non consente la rotazione automatica. Ruota il telefono e disattiva il blocco rotazione se necessario.";
+    } finally {
+      landscapeButton.disabled = false;
+    }
+  });
+}
+
 const RELAY_WS_URL = "wss://sequenzaesatta-relay.onrender.com/relay";
 const params = new URLSearchParams(location.search);
 const relayUrl = params.get("relay") || RELAY_WS_URL;
